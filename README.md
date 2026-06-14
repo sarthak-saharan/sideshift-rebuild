@@ -1,4 +1,8 @@
 # SideShift — Mascot Co-Pilot Feature Concept
+> A pitch-ready feature prototype built on top of [sideshift.app](https://sideshift.app/) to demonstrate high-impact improvements to the current UGC platform landing page — specifically around first-visit engagement, guided conversion, and brand personality.
+
+> **Live demo →** [sideshift.app](https://sideshift.app/) (original) · [My prototype](http://localhost:3000) (feature concept)
+
 > Built by Sarthak Saharan · [LinkedIn](https://www.linkedin.com/in/sarthak-saharan/) · [Portfolio](https://sarthaksaharan.framer.ai/)
 
 ## What I Built
