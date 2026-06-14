@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SideShift – The Operating System for Running UGC at Scale</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Geist is Vercel's font; closest available via Google is Inter. We use Geist from jsDelivr -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  </style>
+  <style>
+    /* ─────────────────────────────────────────
+       DESIGN SYSTEM — exact match to sideshift.app
+       Font: Geist (falling back to Inter)
+       Primary text: #080808
+       Muted text: rgba(32,32,32,0.75)
+       Border: #E8E8E8
+       Accent blue: #E0F5FF / #D0EDFF / #F0FAFF
+       Primary btn: dark gradient pill + noise
+       Secondary btn: white pill
+    ───────────────────────────────────────── */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+      --bg: #ffffff;
+      --fg: #080808;
+      --muted: rgba(32,32,32,0.75);
+      --muted2: rgba(32,32,32,0.5);
+      --border: #E8E8E8;
+      --blue-1: #E0F5FF;
+      --blue-2: #D0EDFF;
+      --blue-3: #F0FAFF;
+      --blue-dark: rgba(1,65,99,0.05);
+      --radius-sm: 6px;
+      --radius: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      /* Section gradient */
+      --section-grad: linear-gradient(180deg,#FFFFFF 0%,#E0F5FF 30%,#D0EDFF 50%,#E0F5FF 70%,#FFFFFF 100%);
+      /* Header scroll bg */
+      --header-scroll-bg: linear-gradient(180deg,#E0F5FF 0%,#F0FAFF 44.95%,#FFFFFF 100%);
+      /* Primary button */
+      --btn-dark: linear-gradient(rgb(81,81,81) 0%, rgb(32,32,32) 100%);
+      /* Noise */
+      --noise: url("https://sideshift.app/noise.avif");
+      --max-w: 1200px;
+      --px-global: 40px;
+      --py-section: 80px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ─── GEIST FONT LOAD ─── */
+    @font-face {
+      font-family: 'Geist';
+      src: url('https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist-sans/Geist-Regular.woff2') format('woff2');
+      font-weight: 400; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Geist';
+      src: url('https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist-sans/Geist-Medium.woff2') format('woff2');
+      font-weight: 500; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Geist';
+      src: url('https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist-sans/Geist-SemiBold.woff2') format('woff2');
+      font-weight: 600; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Geist';
+      src: url('https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist-sans/Geist-Bold.woff2') format('woff2');
+      font-weight: 700; font-style: normal; font-display: swap;
+    }
+
+    /* ─── LAYOUT UTILITIES ─── */
+    .px-global { padding-left: var(--px-global); padding-right: var(--px-global); }
+    .max-w-global { max-width: var(--max-w); margin-left: auto; margin-right: auto; }
+    .py-section { padding-top: var(--py-section); padding-bottom: var(--py-section); }
+
+    /* ─── TYPOGRAPHY ─── */
+    h1 {
+      font-size: clamp(42px, 5.5vw, 69px);
+      font-weight: 700;
+      line-height: 0.9;
+      letter-spacing: -0.05em;
+      color: var(--fg);
+    }
+    h2 {
+      font-size: clamp(28px, 3.5vw, 42px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--fg);
+    }
+    h3 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    p { font-size: 1rem; line-height: 1.6; color: var(--muted); }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 6px;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 1rem;
+      line-height: 1.4;
+      white-space: nowrap;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      text-decoration: none;
+    }
+    .btn:active { transform: scale(0.98); }
+
+    /* Primary: dark gradient pill with noise */
+    .btn-primary {
+      background-image: var(--noise), var(--btn-dark);
+      background-size: auto, 100% 100%;
+      color: #fff;
+      padding: 12px 22px;
+      border: 2px solid transparent;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+
+    /* Secondary: white pill */
+    .btn-secondary {
+      background: #fff;
+      color: var(--fg);
+      padding: 12px 22px;
+      border: 2px solid #fff;
+    }
+    .btn-secondary:hover { background: #f5f5f5; border-color: #f5f5f5; }
+
+    /* Outline: white border on dark bg */
+    .btn-outline {
+      background: transparent;
+      color: var(--fg);
+      padding: 10px 20px;
+      border: 1.5px solid var(--border);
+    }
+    .btn-outline:hover { border-color: #aaa; }
+
+    /* Nav button (light) */
+    .btn-nav {
+      background: var(--fg);
+      color: #fff;
+      padding: 9px 18px;
+      font-size: 0.9rem;
+      border: none;
+    }
+    .btn-nav:hover { opacity: 0.85; }
+
+    .btn-sm {
+      font-size: 0.875rem;
+      padding: 8px 16px;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid transparent;
+      transition: all 0.5s cubic-bezier(0.64,-0.01,0,1);
+      will-change: transform;
+    }
+
+    header.scrolled {
+      background: var(--header-scroll-bg);
+      border-color: rgba(1,65,99,0.08);
+      box-shadow: 0 1px 0 rgba(1,65,99,0.06);
+    }
+
+    .header-inner {
+      width: 100%;
+      max-width: calc(var(--max-w) + 80px);
+      padding: 0 var(--px-global);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--fg);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+      flex-shrink: 0;
+    }
+    .header-logo svg { width: 28px; height: 28px; }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-link {
+      display: flex; align-items: center; gap: 4px;
+      padding: 8px 12px;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      transition: color 0.15s;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font);
+    }
+    .nav-link:hover { color: var(--fg); }
+    .nav-link svg { width: 14px; height: 14px; opacity: 0.5; }
+
+    .header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    .for-creators-link {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 8px 12px;
+      transition: color 0.15s;
+    }
+    .for-creators-link:hover { color: var(--fg); }
+
+    .login-link {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 8px 12px;
+      transition: color 0.15s;
+    }
+    .login-link:hover { color: var(--fg); }
+
+    /* ─── HERO ─── */
+    #hero {
+      position: relative;
+      padding-top: 156px;
+      padding-bottom: 80px;
+      overflow: hidden;
+    }
+
+    .hero-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 var(--px-global);
+      display: flex;
+      align-items: flex-start;
+      gap: 48px;
+    }
+
+    .hero-text {
+      flex: 1;
+      max-width: 676px;
+      min-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(1,65,99,0.06);
+      border: 1px solid rgba(1,65,99,0.12);
+      border-radius: var(--radius-full);
+      padding: 5px 14px 5px 10px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: rgba(1,65,99,0.85);
+    }
+    .hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #0ea5e9; flex-shrink: 0;
+    }
+
+    .hero-h1-wrap { display: flex; flex-direction: column; }
+
+    h1 span.gradient-text {
+      background: linear-gradient(135deg, #080808 0%, #404040 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 520px;
+      margin-top: 4px;
+    }
+
+    .hero-ctas {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .hero-visual {
+      flex: 1;
+      position: relative;
+      min-height: 420px;
+    }
+
+    /* Floating cards in hero visual */
+    .hero-cards-wrap {
+      position: relative;
+      width: 100%;
+      height: 420px;
+    }
+
+    .h-card {
+      position: absolute;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(1,65,99,0.1), 0 1px 4px rgba(0,0,0,0.06);
+      border: 1px solid rgba(1,65,99,0.08);
+      padding: 20px;
+      animation: card-float 4s ease-in-out infinite;
+    }
+    .h-card:nth-child(2) { animation-delay: -1.3s; }
+    .h-card:nth-child(3) { animation-delay: -2.6s; }
+
+    @keyframes card-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .h-card.c1 { top: 0; left: 0; width: 260px; }
+    .h-card.c2 { top: 100px; right: 0; width: 240px; }
+    .h-card.c3 { top: 260px; left: 40px; width: 220px; }
+
+    .hc-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted2); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+    .hc-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .hc-dot.green { background: #22c55e; }
+    .hc-dot.blue { background: #0ea5e9; }
+    .hc-num { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em; color: var(--fg); }
+    .hc-sub { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+    .hc-pill { display: inline-block; margin-top: 10px; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+    .hc-pill.green { background: #dcfce7; color: #15803d; }
+    .hc-pill.blue { background: #e0f2fe; color: #0369a1; }
+    .avatar-row { display: flex; margin-top: 10px; }
+    .av { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; margin-left: -7px; background: linear-gradient(135deg, #bae6fd, #0ea5e9); font-size: 0.65rem; font-weight: 700; color: white; display: flex; align-items: center; justify-content: center; }
+    .av:first-child { margin-left: 0; }
+    .av.dark { background: linear-gradient(135deg, #93c5fd, #3b82f6); }
+    .av.teal { background: linear-gradient(135deg, #a7f3d0, #10b981); }
+
+    /* Hero radial bg glow */
+    #hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%; transform: translateX(-50%);
+      width: 900px; height: 600px;
+      background: radial-gradient(ellipse at center, rgba(1,65,99,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ─── TRUSTED BRANDS ─── */
+    #trust {
+      padding: 48px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .trust-label {
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted2);
+      margin-bottom: 28px;
+    }
+
+    .logos-overflow { overflow: hidden; }
+    .logos-track {
+      display: flex;
+      gap: 56px;
+      width: max-content;
+      animation: marquee 24s linear infinite;
+    }
+    .logos-track:hover { animation-play-state: paused; }
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    .logo-brand {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #B0B0B0;
+      white-space: nowrap;
+      transition: color 0.2s;
+    }
+    .logo-brand:hover { color: #606060; }
+
+    /* ─── METRICS ─── */
+    #metrics {
+      padding: var(--py-section) var(--px-global);
+    }
+
+    .metrics-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .metrics-header h2 { margin-bottom: 12px; }
+    .metrics-header p { max-width: 520px; margin: 0 auto; }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      max-width: var(--max-w);
+      margin: 0 auto;
+    }
+
+    .metric-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius);
+      border: 2px solid #fff;
+      background: #fff;
+      background-image:
+        linear-gradient(rgba(1,65,99,0.05) 0%, rgba(1,65,99,0) 59%),
+        linear-gradient(rgba(240,250,255,1) 0%, rgba(255,255,255,1) 100%);
+      padding: 28px 24px;
+      transition: transform 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 12px rgba(1,65,99,0.08);
+    }
+    .metric-card:hover { transform: translateY(-2px); }
+
+    .metric-num {
+      font-size: clamp(2rem, 3vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      color: var(--fg);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .metric-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--fg);
+      margin-bottom: 2px;
+    }
+
+    .metric-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .metric-tag {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: var(--blue-1);
+      color: rgba(1,65,99,0.85);
+    }
+
+    /* ─── TESTIMONIALS ─── */
+    #testimonials {
+      position: relative;
+      background: var(--section-grad);
+      padding: 80px 0;
+      overflow: hidden;
+    }
+
+    .testimonials-header {
+      text-align: center;
+      margin-bottom: 48px;
+      padding: 0 var(--px-global);
+    }
+    .testimonials-header h2 { margin-bottom: 12px; }
+
+    .testi-track-wrap { overflow: hidden; }
+    .testi-track {
+      display: flex;
+      gap: 16px;
+      width: max-content;
+      animation: testi-scroll 40s linear infinite;
+    }
+    .testi-track:hover { animation-play-state: paused; }
+    @keyframes testi-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    .testi-card {
+      width: 340px;
+      flex-shrink: 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .testi-stars { color: #F59E0B; font-size: 0.95rem; letter-spacing: 1px; }
+
+    .testi-quote {
+      font-size: 0.9rem;
+      color: var(--fg);
+      line-height: 1.65;
+      font-style: italic;
+    }
+
+    .testi-author { display: flex; align-items: center; gap: 12px; margin-top: auto; }
+    .testi-av { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: white; flex-shrink: 0; }
+    .testi-info strong { display: block; font-size: 0.875rem; font-weight: 700; color: var(--fg); }
+    .testi-info span { font-size: 0.78rem; color: var(--muted); }
+
+    /* ─── HOW IT WORKS ─── */
+    #how {
+      padding: var(--py-section) var(--px-global);
+    }
+
+    .how-inner { max-width: var(--max-w); margin: 0 auto; }
+    .how-header { margin-bottom: 48px; }
+    .section-label {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(1,65,99,0.7);
+      background: rgba(1,65,99,0.06);
+      border: 1px solid rgba(1,65,99,0.1);
+      border-radius: var(--radius-full);
+      padding: 4px 12px;
+      margin-bottom: 16px;
+    }
+
+    .how-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .how-tab {
+      padding: 9px 18px;
+      border-radius: var(--radius-full);
+      border: 1.5px solid var(--border);
+      background: transparent;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--font);
+    }
+    .how-tab.active {
+      border-color: var(--fg);
+      color: var(--fg);
+      background: var(--fg);
+      color: #fff;
+    }
+    .how-tab:hover:not(.active) { border-color: #999; color: var(--fg); }
+
+    .how-panel { display: none; }
+    .how-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+
+    .how-text h3 { font-size: 1.6rem; margin-bottom: 12px; }
+    .how-text > p { margin-bottom: 24px; }
+
+    .feature-list { display: flex; flex-direction: column; gap: 12px; }
+    .feature-item { display: flex; gap: 10px; align-items: flex-start; }
+    .feature-icon {
+      width: 20px; height: 20px; border-radius: 5px;
+      background: var(--fg); flex-shrink: 0; margin-top: 2px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .feature-icon svg { width: 11px; height: 11px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .feature-item p { font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
+
+    .how-visual {
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--blue-3) 0%, var(--blue-1) 100%);
+      padding: 36px;
+      min-height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Mock UI inside how-visual */
+    .mock-ui {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(1,65,99,0.12);
+      padding: 20px;
+      width: 100%;
+    }
+    .mock-dots { display: flex; gap: 5px; margin-bottom: 16px; }
+    .md { width: 9px; height: 9px; border-radius: 50%; }
+    .md.r { background: #ff5f57; }
+    .md.y { background: #febc2e; }
+    .md.g { background: #28c840; }
+    .mock-row { height: 8px; border-radius: 4px; background: #f1f5f9; margin-bottom: 8px; }
+    .mock-row.blue { background: var(--blue-1); }
+    .mock-row.dark { background: #e2e8f0; }
+    .mock-grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 14px; }
+    .mock-cell { height: 52px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; }
+    .mock-cell.hl { background: var(--blue-1); border-color: rgba(1,65,99,0.15); }
+    .mock-stat-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .mock-stat { flex: 1; height: 48px; border-radius: 8px; background: var(--blue-1); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .mock-stat.white { background: #f8fafc; border: 1px solid #e2e8f0; }
+    .mock-stat span { font-size: 0.65rem; font-weight: 700; color: rgba(1,65,99,0.7); }
+    .mock-stat strong { font-size: 0.85rem; font-weight: 700; color: var(--fg); }
+    .mock-success { background: #f0fdf4; border-radius: 8px; padding: 10px 12px; font-size: 0.72rem; color: #15803d; font-weight: 600; margin-bottom: 10px; }
+
+    /* ─── COMPARISON ─── */
+    #compare {
+      background: #FAFAFA;
+      padding: var(--py-section) var(--px-global);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .compare-inner { max-width: var(--max-w); margin: 0 auto; }
+    .compare-header-text { text-align: center; margin-bottom: 48px; }
+    .compare-header-text h2 { margin-bottom: 12px; }
+
+    .compare-table {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .ct-head {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ct-col {
+      padding: 20px 20px;
+      border-right: 1px solid var(--border);
+    }
+    .ct-col:last-child { border-right: none; }
+    .ct-col.highlight { background: var(--fg); }
+    .ct-col.highlight .ct-col-title { color: #fff; }
+    .ct-col.highlight .ct-col-sub { color: rgba(255,255,255,0.6); }
+
+    .ct-col-title { font-size: 0.9rem; font-weight: 700; color: var(--fg); margin-bottom: 2px; }
+    .ct-col-sub { font-size: 0.75rem; color: var(--muted); }
+
+    .ct-row {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      border-bottom: 1px solid var(--border);
+    }
+    .ct-row:last-child { border-bottom: none; }
+
+    .ct-cell {
+      padding: 14px 20px;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      border-right: 1px solid var(--border);
+    }
+    .ct-cell:last-child { border-right: none; }
+    .ct-cell.feat { font-weight: 500; color: var(--fg); background: #FAFAFA; }
+    .ct-cell.yes { color: #15803d; }
+    .ct-cell.no { color: #9ca3af; }
+    .ct-cell.highlight-cell { background: #FAFAFA; }
+    .check-y { font-size: 0.9rem; }
+    .check-n { font-size: 0.9rem; opacity: 0.5; }
+
+    /* ─── CREATOR NETWORK ─── */
+    #creators {
+      padding: var(--py-section) var(--px-global);
+    }
+    .creators-inner { max-width: var(--max-w); margin: 0 auto; }
+    .creators-header { margin-bottom: 40px; }
+    .creators-header h2 { margin-bottom: 12px; }
+
+    .filter-strip {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .filter-btn {
+      padding: 7px 16px;
+      border-radius: var(--radius-full);
+      border: 1.5px solid var(--border);
+      background: #fff;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+    .filter-btn.active, .filter-btn:hover {
+      border-color: var(--fg);
+      color: var(--fg);
+      background: #fff;
+    }
+    .filter-btn.active { background: var(--fg); color: #fff; border-color: var(--fg); }
+
+    .creators-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .creator-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      transition: all 0.2s;
+    }
+    .creator-card:hover { border-color: #aaa; box-shadow: 0 6px 20px rgba(0,0,0,0.06); transform: translateY(-2px); }
+
+    .creator-av {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1rem; color: #fff;
+      margin-bottom: 12px;
+    }
+    .creator-name { font-size: 0.95rem; font-weight: 700; color: var(--fg); margin-bottom: 4px; }
+    .creator-niche { font-size: 0.78rem; color: var(--muted); margin-bottom: 12px; }
+    .creator-stats { display: flex; gap: 14px; }
+    .cs { font-size: 0.78rem; }
+    .cs strong { font-weight: 700; color: var(--fg); }
+    .cs span { color: var(--muted); }
+    .creator-rating { font-size: 0.78rem; color: #F59E0B; margin-top: 8px; }
+
+    /* ─── CTA SECTION ─── */
+    #cta {
+      background: var(--section-grad);
+      padding: 100px var(--px-global);
+      text-align: center;
+    }
+    .cta-inner { max-width: 680px; margin: 0 auto; }
+    #cta h2 { margin-bottom: 14px; }
+    #cta p { font-size: 1.05rem; margin-bottom: 36px; max-width: 480px; margin-left: auto; margin-right: auto; }
+    .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ─── FAQ ─── */
+    #faq {
+      padding: var(--py-section) var(--px-global);
+    }
+    .faq-inner { max-width: 720px; margin: 0 auto; }
+    .faq-header { text-align: center; margin-bottom: 48px; }
+    .faq-header h2 { margin-bottom: 10px; }
+
+    .faq-list { display: flex; flex-direction: column; gap: 2px; }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-q {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 0;
+      font-size: 0.95rem; font-weight: 600; color: var(--fg);
+      cursor: pointer;
+      gap: 16px;
+    }
+    .faq-q:hover { color: #333; }
+    .faq-icon { font-size: 1.1rem; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; }
+    .faq-a { display: none; padding-bottom: 20px; font-size: 0.9rem; color: var(--muted); line-height: 1.7; }
+    .faq-item.open .faq-a { display: block; }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--fg);
+      color: rgba(255,255,255,0.6);
+      padding: 64px var(--px-global) 40px;
+    }
+
+    .footer-inner { max-width: var(--max-w); margin: 0 auto; }
+
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 56px;
+    }
+
+    .footer-logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 700; font-size: 1rem; color: #fff;
+      margin-bottom: 12px; text-decoration: none;
+    }
+    .footer-logo-icon { width: 24px; height: 24px; border-radius: 6px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; }
+
+    .footer-brand p { font-size: 0.85rem; line-height: 1.7; max-width: 220px; }
+
+    .footer-col h4 { color: #fff; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
+    .footer-col a { display: block; color: rgba(255,255,255,0.55); text-decoration: none; font-size: 0.85rem; margin-bottom: 10px; transition: color 0.15s; }
+    .footer-col a:hover { color: #fff; }
+
+    .footer-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.78rem;
+    }
+    .social-row { display: flex; gap: 16px; }
+    .social-row a { color: rgba(255,255,255,0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.15s; }
+    .social-row a:hover { color: #fff; }
+
+    /* ─── MASCOT CO-PILOT ─── */
+    #copilot {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    #copilot-bubble {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 18px 18px 4px 18px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
+      padding: 18px 20px;
+      max-width: 280px;
+      min-width: 220px;
+      animation: bubble-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes bubble-in {
+      from { opacity: 0; transform: scale(0.8) translateY(12px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .bubble-name {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted2);
+      margin-bottom: 6px;
+    }
+    .bubble-text {
+      font-size: 0.875rem;
+      line-height: 1.55;
+      color: var(--fg);
+    }
+    .bubble-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .bact {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      font-family: var(--font);
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .bact.next {
+      background-image: var(--noise), var(--btn-dark);
+      background-size: auto, 100%;
+      color: #fff;
+    }
+    .bact.next:hover { opacity: 0.85; }
+    .bact.skip {
+      background: #f5f5f5;
+      color: var(--muted);
+    }
+    .bact.skip:hover { background: #eee; }
+
+    .bubble-progress {
+      display: flex;
+      gap: 4px;
+      margin-top: 12px;
+    }
+    .bp-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: #E0E0E0;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .bp-dot.active { background: var(--fg); transform: scale(1.3); }
+
+    #mascot-img {
+      width: 264px;
+      height: auto;
+      cursor: pointer;
+      filter: drop-shadow(0 8px 20px rgba(0,0,0,0.2));
+      transition: transform 0.2s;
+      animation: shifty-float 3s ease-in-out infinite;
+    }
+    #mascot-img:hover { transform: scale(1.06); }
+    @keyframes shifty-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* Highlight ring on tour target */
+    .tour-highlight {
+      outline: 2.5px solid rgba(1,65,99,0.6) !important;
+      outline-offset: 6px !important;
+      border-radius: 8px;
+      transition: outline 0.3s !important;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1024px) {
+      :root { --px-global: 24px; }
+      .hero-inner { flex-direction: column; }
+      .hero-text { min-width: unset; }
+      .hero-visual { display: none; }
+      .metrics-grid { grid-template-columns: repeat(2,1fr); }
+      .creators-grid { grid-template-columns: repeat(2,1fr); }
+      .footer-top { grid-template-columns: 1fr 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .header-nav { display: none; }
+      .for-creators-link { display: none; }
+      .how-panel.active { grid-template-columns: 1fr; }
+      .how-visual { display: none; }
+      .testi-track { animation-play-state: paused; flex-wrap: wrap; width: 100%; padding: 0 var(--px-global); }
+      .testi-card { width: 100%; }
+      .ct-head, .ct-row { grid-template-columns: 1fr 1fr; }
+      .ct-cell:nth-child(3), .ct-cell:nth-child(4), .ct-col:nth-child(3), .ct-col:nth-child(4) { display: none; }
+      .creators-grid { grid-template-columns: 1fr 1fr; }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════ DISCLAIMER BANNER ═══════════════════ -->
+<div id="disclaimer-banner" style="position:fixed;top:0;left:0;right:0;z-index:200;background:#fdf2f2;border-bottom:1px solid #f5c6c6;padding:9px 24px;text-align:center;font-size:0.8rem;color:#666;font-family:var(--font);">
+  <strong>Landing-page feature concept</strong> for <a href="https://sideshift.app/" target="_blank" style="color:#333;text-decoration:underline;font-weight:500;">SideShift</a> · Built by <a href="https://www.linkedin.com/in/sarthak-saharan/" target="_blank" style="color:#333;text-decoration:underline;font-weight:500;">Sarthak Saharan</a> · Demo data only, not affiliated with SideShift.
+</div>
+
+<!-- ═══════════════════ HEADER ═══════════════════ -->
+<header id="main-header">
+  <div class="header-inner">
+    <a href="#" class="header-logo">
+      <img src="Logo.png" alt="SideShift" style="height:32px;width:auto;" />
+    </a>
+
+    <nav class="header-nav">
+      <button class="nav-link">
+        Platform
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <button class="nav-link">
+        Solutions
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <a href="#" class="nav-link">Pricing</a>
+      <button class="nav-link">
+        Resources
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </nav>
+
+    <div class="header-actions">
+      <a href="#" class="for-creators-link">For Creators</a>
+      <a href="#" class="login-link">Log In</a>
+      <a href="#" class="btn btn-nav btn-sm">Start Free Trial</a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Now with AI-powered creator matching
+      </div>
+
+      <div class="hero-h1-wrap">
+        <h1>The Operating System<br>for Running UGC at Scale</h1>
+      </div>
+
+      <p class="hero-sub">Recruit creators, manage campaigns, track performance, and automate payments — all in one platform built for brands that move fast.</p>
+
+      <div class="hero-ctas">
+        <button class="btn btn-primary">Start Your Free Trial</button>
+        <button class="btn btn-secondary" style="border-color: var(--border); background: #fff;">Book a Demo</button>
+      </div>
+
+      <p style="font-size:0.78rem; color:var(--muted2); margin-top: 8px;">No credit card required · Free 14-day trial</p>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-cards-wrap">
+        <div class="h-card c1">
+          <div class="hc-label"><span class="hc-dot green"></span> Campaign Live</div>
+          <div class="hc-num">$12,400</div>
+          <div class="hc-sub">Paid to 24 creators · 3 sec</div>
+          <div class="avatar-row">
+            <div class="av">A</div><div class="av dark">B</div><div class="av teal">C</div>
+            <div class="av" style="background:#f1f5f9;color:#94a3b8;font-size:.6rem">+21</div>
+          </div>
+          <div class="hc-pill green">● Active</div>
+        </div>
+        <div class="h-card c2">
+          <div class="hc-label"><span class="hc-dot blue"></span> Performance</div>
+          <div class="hc-num">5.2M</div>
+          <div class="hc-sub">Views · Last 30 days · ↑ 34%</div>
+          <div class="hc-pill blue">Real-time ↗</div>
+        </div>
+        <div class="h-card c3">
+          <div class="hc-label"><span class="hc-dot green"></span> Payment Sent</div>
+          <div class="hc-num">$48K</div>
+          <div class="hc-sub">This month · 1 click</div>
+          <div class="hc-pill green">Automated ✓</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ TRUSTED BRANDS ═══════════════════ -->
+<section id="trust">
+  <div class="trust-label">Trusted By Top Brands Worldwide:</div>
+  <div class="logos-overflow">
+    <div class="logos-track">
+      <span class="logo-brand">Gymshark</span>
+      <span class="logo-brand">MVMT</span>
+      <span class="logo-brand">Ridge Wallet</span>
+      <span class="logo-brand">Hims</span>
+      <span class="logo-brand">Hexclad</span>
+      <span class="logo-brand">Vuori</span>
+      <span class="logo-brand">Caraway</span>
+      <span class="logo-brand">Liquid I.V.</span>
+      <span class="logo-brand">Brez</span>
+      <span class="logo-brand">DTC House</span>
+      <span class="logo-brand">Gymshark</span>
+      <span class="logo-brand">MVMT</span>
+      <span class="logo-brand">Ridge Wallet</span>
+      <span class="logo-brand">Hims</span>
+      <span class="logo-brand">Hexclad</span>
+      <span class="logo-brand">Vuori</span>
+      <span class="logo-brand">Caraway</span>
+      <span class="logo-brand">Liquid I.V.</span>
+      <span class="logo-brand">Brez</span>
+      <span class="logo-brand">DTC House</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ METRICS ═══════════════════ -->
+<section id="metrics">
+  <div class="metrics-header max-w-global">
+    <div class="section-label">The Numbers</div>
+    <h2>The Numbers That Power SideShift</h2>
+    <p>Real scale, real results — the platform that the world's fastest-growing brands trust to run UGC.</p>
+  </div>
+  <div class="metrics-grid">
+    <a href="#" class="metric-card">
+      <div class="metric-num">1,500+</div>
+      <div class="metric-title">Brands</div>
+      <div class="metric-sub">Actively hiring</div>
+      <div class="metric-tag">↑ 32% this quarter</div>
+    </a>
+    <a href="#" class="metric-card">
+      <div class="metric-num">700K+</div>
+      <div class="metric-title">Creators</div>
+      <div class="metric-sub">Already onboarded</div>
+      <div class="metric-tag">Vetted & ready</div>
+    </a>
+    <a href="#" class="metric-card">
+      <div class="metric-num">5B+</div>
+      <div class="metric-title">Views Delivered</div>
+      <div class="metric-sub">Last 90 days</div>
+      <div class="metric-tag">Across all platforms</div>
+    </a>
+    <a href="#" class="metric-card">
+      <div class="metric-num">$100M+</div>
+      <div class="metric-title">Paid Out</div>
+      <div class="metric-sub">To creators seamlessly</div>
+      <div class="metric-tag">1-click payouts</div>
+    </a>
+  </div>
+</section>
+
+<!-- ═══════════════════ TESTIMONIALS ═══════════════════ -->
+<section id="testimonials">
+  <div class="testimonials-header">
+    <div class="section-label">Testimonials</div>
+    <h2>Hear why teams choose SideShift</h2>
+  </div>
+  <div class="testi-track-wrap">
+    <div class="testi-track">
+      <!-- Set 1 -->
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"SideShift completely transformed how we run UGC. We went from 5 creators a month to over 80 — without adding headcount. It's an all-in-one hub."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:linear-gradient(135deg,#bae6fd,#0ea5e9)">ML</div>
+          <div class="testi-info"><strong>Mike L.</strong><span>Head of Growth, Social Launchpad</span></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"Payment automation alone saved us 10 hours a week. Creators love getting paid fast, and we love not having to think about it."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:linear-gradient(135deg,#fda4af,#f43f5e)">SR</div>
+          <div class="testi-info"><strong>Sarah R.</strong><span>CMO, DTC House</span></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"Finding quality UGC creators used to take weeks. Now I have 20 applicants within 24 hours. The quality has been incredible."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:linear-gradient(135deg,#a7f3d0,#10b981)">JK</div>
+          <div class="testi-info"><strong>James K.</strong><span>Founder, Brez Drinks</span></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"The performance dashboard is a game changer. I can see exactly which creators are driving conversions and double down on what works."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:linear-gradient(135deg,#fcd34d,#f59e0b)">AP</div>
+          <div class="testi-info"><strong>Alicia P.</strong><span>Performance Lead, Caraway</span></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"We scaled from $50K to $500K in UGC spend in one quarter using SideShift. The infrastructure just works. Can't imagine going back."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:linear-gradient(135deg,#93c5fd,#3b82f6)">DM</div>
+          <div class="testi-info"><strong>David M.</strong><span>VP Marketing, Vuori</span></div>
+        </div>
+      </div>
+      <!-- Duplicate set for seamless loop -->
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"SideShift completely transformed how we run UGC. We went from 5 creators a month to over 80 — without adding headcount. It's an all-in-one hub."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:linear-gradient(135deg,#bae6fd,#0ea5e9)">ML</div>
+          <div class="testi-info"><strong>Mike L.</strong><span>Head of Growth, Social Launchpad</span></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"Payment automation alone saved us 10 hours a week. Creators love getting paid fast, and we love not having to think about it."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:linear-gradient(135deg,#fda4af,#f43f5e)">SR</div>
+          <div class="testi-info"><strong>Sarah R.</strong><span>CMO, DTC House</span></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"Finding quality UGC creators used to take weeks. Now I have 20 applicants within 24 hours. The quality has been incredible."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:linear-gradient(135deg,#a7f3d0,#10b981)">JK</div>
+          <div class="testi-info"><strong>James K.</strong><span>Founder, Brez Drinks</span></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"The performance dashboard is a game changer. I can see exactly which creators are driving conversions and double down on what works."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:linear-gradient(135deg,#fcd34d,#f59e0b)">AP</div>
+          <div class="testi-info"><strong>Alicia P.</strong><span>Performance Lead, Caraway</span></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"We scaled from $50K to $500K in UGC spend in one quarter using SideShift. The infrastructure just works. Can't imagine going back."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:linear-gradient(135deg,#93c5fd,#3b82f6)">DM</div>
+          <div class="testi-info"><strong>David M.</strong><span>VP Marketing, Vuori</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ HOW IT WORKS ═══════════════════ -->
+<section id="how">
+  <div class="how-inner">
+    <div class="how-header">
+      <div class="section-label">How It Works</div>
+      <h2>How SideShift Works for Brands</h2>
+      <p style="max-width:480px;margin-top:12px;">Everything you need to source, manage, and pay creators — in one seamless workflow.</p>
+    </div>
+
+    <div class="how-tabs">
+      <button class="how-tab active" onclick="switchHowTab(0,this)">Creator Sourcing</button>
+      <button class="how-tab" onclick="switchHowTab(1,this)">Campaign Management</button>
+      <button class="how-tab" onclick="switchHowTab(2,this)">Performance Tracking</button>
+      <button class="how-tab" onclick="switchHowTab(3,this)">Payment Automation</button>
+      <button class="how-tab" onclick="switchHowTab(4,this)">Creator Filtering</button>
+    </div>
+
+    <div class="how-panel active" id="how-0">
+      <div class="how-text">
+        <h3>Find your perfect creators instantly</h3>
+        <p>Access 700,000+ vetted creators. Filter by niche, engagement, audience demographics, and past performance to find your ideal match in seconds.</p>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>Advanced filters: niche, location, followers, engagement rate</p>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>AI-powered matching based on your brand and product category</p>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>Portfolio preview and verified past UGC performance data</p>
+          </div>
+        </div>
+      </div>
+      <div class="how-visual">
+        <div class="mock-ui">
+          <div class="mock-dots"><div class="md r"></div><div class="md y"></div><div class="md g"></div></div>
+          <div class="mock-row blue" style="width:55%"></div>
+          <div class="mock-row" style="width:80%"></div>
+          <div class="mock-grid-3">
+            <div class="mock-cell hl"></div><div class="mock-cell"></div><div class="mock-cell hl"></div>
+            <div class="mock-cell"></div><div class="mock-cell hl"></div><div class="mock-cell"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="how-panel" id="how-1">
+      <div class="how-text">
+        <h3>Manage every campaign from one hub</h3>
+        <p>Brief creators, review content, request revisions, and publish — without ever leaving SideShift. Your entire workflow in one place.</p>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>Centralised content review and one-click approval workflow</p>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>Automated brief delivery and deadline tracking</p>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>Slack & email integrations for seamless team communication</p>
+          </div>
+        </div>
+      </div>
+      <div class="how-visual">
+        <div class="mock-ui">
+          <div class="mock-dots"><div class="md r"></div><div class="md y"></div><div class="md g"></div></div>
+          <div class="mock-row blue" style="width:45%"></div>
+          <div class="mock-row" style="width:90%"></div>
+          <div class="mock-row dark" style="width:70%"></div>
+          <div class="mock-row blue" style="width:55%"></div>
+          <div class="mock-row" style="width:85%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="how-panel" id="how-2">
+      <div class="how-text">
+        <h3>Real-time performance dashboard</h3>
+        <p>Track views, engagement, CTR, and ROAS across all UGC in one unified dashboard. Know what's working — in real time.</p>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>Live metrics: views, engagement rate, CTR, and ROAS</p>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>Side-by-side creator performance comparisons</p>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>Exportable CSV and PDF reports for stakeholders</p>
+          </div>
+        </div>
+      </div>
+      <div class="how-visual">
+        <div class="mock-ui">
+          <div class="mock-dots"><div class="md r"></div><div class="md y"></div><div class="md g"></div></div>
+          <div class="mock-stat-row">
+            <div class="mock-stat"><strong>5.2M</strong><span>Views</span></div>
+            <div class="mock-stat white"><strong style="color:#15803d">↑ 34%</strong><span>vs last mo.</span></div>
+            <div class="mock-stat"><strong>4.8%</strong><span>Eng. rate</span></div>
+          </div>
+          <div class="mock-row dark" style="width:100%;height:6px"></div>
+          <div class="mock-row blue" style="width:80%;height:6px"></div>
+          <div class="mock-row dark" style="width:95%;height:6px"></div>
+          <div class="mock-row blue" style="width:60%;height:6px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="how-panel" id="how-3">
+      <div class="how-text">
+        <h3>Pay creators in one click</h3>
+        <p>No spreadsheets, no manual wire transfers. Set payment terms upfront — SideShift pays creators automatically when milestones are hit.</p>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>Payments triggered automatically on content approval</p>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>Supports PayPal, ACH, wire transfer, and Stripe</p>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>Automated W-9 collection and 1099 generation at year-end</p>
+          </div>
+        </div>
+      </div>
+      <div class="how-visual">
+        <div class="mock-ui">
+          <div class="mock-dots"><div class="md r"></div><div class="md y"></div><div class="md g"></div></div>
+          <div class="mock-success">✓ $12,400 paid to 24 creators · 3 seconds</div>
+          <div class="mock-row" style="width:70%"></div>
+          <div class="mock-row blue" style="width:50%"></div>
+          <div class="mock-row" style="width:85%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="how-panel" id="how-4">
+      <div class="how-text">
+        <h3>Precision creator filtering</h3>
+        <p>Never waste time reviewing the wrong creators. Smart filters surface top candidates that match your exact campaign requirements.</p>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>Filter by age, gender, location, language, and platform</p>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>Sort by relevance, engagement rate, or past earnings</p>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p>Save custom filter presets for repeated campaign types</p>
+          </div>
+        </div>
+      </div>
+      <div class="how-visual">
+        <div class="mock-ui">
+          <div class="mock-dots"><div class="md r"></div><div class="md y"></div><div class="md g"></div></div>
+          <div class="mock-row blue" style="width:40%"></div>
+          <div class="mock-grid-3">
+            <div class="mock-cell"></div><div class="mock-cell hl"></div><div class="mock-cell"></div>
+            <div class="mock-cell hl"></div><div class="mock-cell"></div><div class="mock-cell hl"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ COMPARISON ═══════════════════ -->
+<section id="compare">
+  <div class="compare-inner">
+    <div class="compare-header-text">
+      <div class="section-label">Why SideShift</div>
+      <h2>One Platform for All Your UGC Campaigns</h2>
+      <p style="max-width:480px;margin:12px auto 0">See how SideShift stacks up against doing it yourself or using an agency.</p>
+    </div>
+
+    <div class="compare-table">
+      <div class="ct-head">
+        <div class="ct-col" style="background:#FAFAFA"><div class="ct-col-title">Feature</div></div>
+        <div class="ct-col highlight"><div class="ct-col-title">SideShift</div><div class="ct-col-sub">All-in-one platform</div></div>
+        <div class="ct-col"><div class="ct-col-title">DIY</div><div class="ct-col-sub">Doing it yourself</div></div>
+        <div class="ct-col"><div class="ct-col-title">Agency</div><div class="ct-col-sub">Traditional agency</div></div>
+      </div>
+      <div class="ct-row">
+        <div class="ct-cell feat">Access to vetted creators</div>
+        <div class="ct-cell yes highlight-cell"><span class="check-y">✓</span> 700K+ creators</div>
+        <div class="ct-cell no"><span class="check-n">✗</span> Manual outreach</div>
+        <div class="ct-cell no"><span class="check-n">✗</span> Limited roster</div>
+      </div>
+      <div class="ct-row">
+        <div class="ct-cell feat">Real-time performance dashboard</div>
+        <div class="ct-cell yes highlight-cell"><span class="check-y">✓</span> Built-in</div>
+        <div class="ct-cell no"><span class="check-n">✗</span> Spreadsheets</div>
+        <div class="ct-cell no"><span class="check-n">✗</span> Monthly PDF reports</div>
+      </div>
+      <div class="ct-row">
+        <div class="ct-cell feat">Automated payments</div>
+        <div class="ct-cell yes highlight-cell"><span class="check-y">✓</span> 1-click payouts</div>
+        <div class="ct-cell no"><span class="check-n">✗</span> Manual wire transfers</div>
+        <div class="ct-cell no"><span class="check-n">✗</span> Slow processing</div>
+      </div>
+      <div class="ct-row">
+        <div class="ct-cell feat">Pricing</div>
+        <div class="ct-cell yes highlight-cell"><span class="check-y">✓</span> Flat monthly fee</div>
+        <div class="ct-cell no"><span class="check-n">—</span> Low but time-heavy</div>
+        <div class="ct-cell no"><span class="check-n">✗</span> 15–30% commission</div>
+      </div>
+      <div class="ct-row">
+        <div class="ct-cell feat">Scalability</div>
+        <div class="ct-cell yes highlight-cell"><span class="check-y">✓</span> Unlimited</div>
+        <div class="ct-cell no"><span class="check-n">✗</span> Hard to scale</div>
+        <div class="ct-cell no"><span class="check-n">—</span> Capacity-limited</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ CREATORS ═══════════════════ -->
+<section id="creators">
+  <div class="creators-inner">
+    <div class="creators-header">
+      <div class="section-label">Creator Network</div>
+      <h2>The new standard for creator marketing</h2>
+      <p style="max-width:480px;margin-top:12px;">Browse 700,000+ vetted creators across every niche. Filter, shortlist, and hire in minutes.</p>
+    </div>
+
+    <div class="filter-strip">
+      <button class="filter-btn active" onclick="setFilter(this)">All</button>
+      <button class="filter-btn" onclick="setFilter(this)">Health & Wellness</button>
+      <button class="filter-btn" onclick="setFilter(this)">Beauty</button>
+      <button class="filter-btn" onclick="setFilter(this)">Fitness</button>
+      <button class="filter-btn" onclick="setFilter(this)">Tech</button>
+      <button class="filter-btn" onclick="setFilter(this)">Food & Beverage</button>
+      <button class="filter-btn" onclick="setFilter(this)">Fashion</button>
+    </div>
+
+    <div class="creators-grid">
+      <div class="creator-card">
+        <div class="creator-av" style="background:linear-gradient(135deg,#bae6fd,#0ea5e9)">AM</div>
+        <div class="creator-name">Alexa M.</div>
+        <div class="creator-niche">🏋️ Fitness · TikTok · Instagram</div>
+        <div class="creator-stats">
+          <div class="cs"><strong>248K</strong><span> followers</span></div>
+          <div class="cs"><strong>6.2%</strong><span> eng.</span></div>
+        </div>
+        <div class="creator-rating">★★★★★ 4.9</div>
+      </div>
+      <div class="creator-card">
+        <div class="creator-av" style="background:linear-gradient(135deg,#fda4af,#f43f5e)">JR</div>
+        <div class="creator-name">Jordan R.</div>
+        <div class="creator-niche">💄 Beauty · YouTube · TikTok</div>
+        <div class="creator-stats">
+          <div class="cs"><strong>512K</strong><span> followers</span></div>
+          <div class="cs"><strong>4.8%</strong><span> eng.</span></div>
+        </div>
+        <div class="creator-rating">★★★★★ 4.8</div>
+      </div>
+      <div class="creator-card">
+        <div class="creator-av" style="background:linear-gradient(135deg,#a7f3d0,#10b981)">KL</div>
+        <div class="creator-name">Kai L.</div>
+        <div class="creator-niche">🥗 Food & Bev · Instagram · TikTok</div>
+        <div class="creator-stats">
+          <div class="cs"><strong>89K</strong><span> followers</span></div>
+          <div class="cs"><strong>9.1%</strong><span> eng.</span></div>
+        </div>
+        <div class="creator-rating">★★★★★ 5.0</div>
+      </div>
+      <div class="creator-card">
+        <div class="creator-av" style="background:linear-gradient(135deg,#fcd34d,#f59e0b)">ST</div>
+        <div class="creator-name">Sofia T.</div>
+        <div class="creator-niche">💻 Tech · YouTube · Twitter</div>
+        <div class="creator-stats">
+          <div class="cs"><strong>1.2M</strong><span> followers</span></div>
+          <div class="cs"><strong>3.4%</strong><span> eng.</span></div>
+        </div>
+        <div class="creator-rating">★★★★☆ 4.7</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ CTA ═══════════════════ -->
+<section id="cta">
+  <div class="cta-inner">
+    <div class="section-label">Get Started</div>
+    <h2>Launch Your UGC Campaign Today</h2>
+    <p>Join 1,500+ brands already using SideShift to find creators, run campaigns, and scale their UGC engine — faster than ever.</p>
+    <div class="cta-btns">
+      <button class="btn btn-primary">Start Your Free Trial</button>
+      <button class="btn btn-outline">Book a Demo</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ FAQ ═══════════════════ -->
+<section id="faq">
+  <div class="faq-inner">
+    <div class="faq-header">
+      <div class="section-label">FAQ</div>
+      <h2>Frequently asked questions</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">What is UGC and why does it matter for my brand? <span class="faq-icon">+</span></div>
+        <div class="faq-a">UGC (User-Generated Content) is authentic content made by real creators showcasing your product. It consistently outperforms brand-produced content in conversion rates and trust — often by 3–5x. It's the most cost-effective form of performance creative today.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How quickly can I find and hire creators? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Most brands receive 10–20 qualified applications within 24 hours of posting a campaign. Our matching algorithm surfaces the most relevant creators from our 700K+ network instantly — no cold outreach needed.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How do payments work? <span class="faq-icon">+</span></div>
+        <div class="faq-a">You set payment terms when creating a campaign. When content is approved, payments are automatically triggered. We support PayPal, ACH, wire transfers, and Stripe. We also handle W-9 collection and 1099 generation at year-end.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">What industries does SideShift support? <span class="faq-icon">+</span></div>
+        <div class="faq-a">SideShift works for brands across all consumer categories: health & wellness, beauty, fashion, food & beverage, tech, home goods, fitness, supplements, pet care, and more. If you sell a product, we have creators for it.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Is there a free trial? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes. You can start with a free 14-day trial — no credit card required. Post your first campaign and start receiving creator applications immediately.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How is creator quality ensured? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Every creator goes through a verification process including content quality review, engagement rate validation, and identity confirmation. Brands can view portfolio samples and past campaign data before hiring.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Can I track which UGC content is actually driving sales? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes. Our performance dashboard shows real-time metrics including views, CTR, ROAS, and conversion data linked to each piece of content. You can identify your top performers and reallocate budgets instantly.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="footer-logo">
+          <img src="Logo.png" alt="SideShift" style="height:28px;width:auto;filter:brightness(0) invert(1);" />
+        </a>
+        <p>The operating system for brands running UGC at scale. Recruit, manage, and pay creators — all in one platform.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a href="#">Creator Sourcing</a>
+        <a href="#">Campaign Management</a>
+        <a href="#">Performance Tracking</a>
+        <a href="#">Payment Automation</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="#">About</a>
+        <a href="#">Blog</a>
+        <a href="#">Case Studies</a>
+        <a href="#">Careers</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="#">Documentation</a>
+        <a href="#">Creator Resources</a>
+        <a href="#">Pricing</a>
+        <a href="#">Customer Support</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 SideShift. All rights reserved.</span>
+      <div class="social-row">
+        <a href="#">𝕏</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">Instagram</a>
+        <a href="#">TikTok</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════ MASCOT CO-PILOT ═══════════════════ -->
+<div id="copilot">
+  <div id="copilot-bubble">
+    <div class="bubble-name">Shifty · SideShift Guide</div>
+    <div class="bubble-text" id="bubble-text">Hey! 👋 I'm Shifty, your SideShift co-pilot. Want me to walk you through the platform?</div>
+    <div class="bubble-actions">
+      <button class="bact next" onclick="nextStep()">Let's go →</button>
+      <button class="bact skip" onclick="closeBubble()">Skip</button>
+    </div>
+    <div class="bubble-progress" id="bubble-progress"></div>
+  </div>
+  <img id="mascot-img" src="SideShift.png" alt="Shifty" onclick="toggleBubble()" />
+</div>
+
+<script>
+  // ─── STICKY HEADER ───
+  const header = document.getElementById('main-header');
+  const banner = document.getElementById('disclaimer-banner');
+
+  function positionHeader() {
+    header.style.top = banner.offsetHeight + 'px';
+  }
+  positionHeader();
+  window.addEventListener('resize', positionHeader);
+
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  // ─── HOW IT WORKS TABS ───
+  function switchHowTab(index, btn) {
+    document.querySelectorAll('.how-tab').forEach((t,i) => t.classList.toggle('active', i === index));
+    document.querySelectorAll('.how-panel').forEach((p,i) => p.classList.toggle('active', i === index));
+  }
+
+  // ─── FAQ ───
+  function toggleFaq(el) {
+    el.parentElement.classList.toggle('open');
+  }
+
+  // ─── CREATOR FILTER ───
+  function setFilter(btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  // ─── MASCOT TOUR ───
+  const tourSteps = [
+    {
+      target: '#main-header',
+      text: 'This is the navigation. Jump to Platform features, Pricing, or Resources from here. "Start Free Trial" is always one click away!'
+    },
+    {
+      target: '#hero',
+      text: 'The hero makes the promise: SideShift is the OS for running UGC at scale. Two CTAs — free trial or a personalised demo.'
+    },
+    {
+      target: '#trust',
+      text: 'Over 1,500 top brands trust SideShift — Gymshark, Hexclad, Vuori, and more. The logos scroll on loop automatically.'
+    },
+    {
+      target: '#metrics',
+      text: '700K+ creators, 5B+ views, $100M+ paid out. Click any card to explore that metric in depth.'
+    },
+    {
+      target: '#testimonials',
+      text: 'Real quotes from real teams. The cards auto-scroll — hover to pause and read any one.'
+    },
+    {
+      target: '#how',
+      text: 'Click the tabs to explore each capability: sourcing, campaigns, performance, payments, and filtering. Each tab has an interactive preview.'
+    },
+    {
+      target: '#compare',
+      text: 'The comparison table shows why SideShift beats DIY or an agency on every dimension — access, automation, cost, and scale.'
+    },
+    {
+      target: '#creators',
+      text: 'Browse the creator network. Filter by niche to find exactly who you need — every creator is vetted for quality.'
+    },
+    {
+      target: '#cta',
+      text: 'Ready? Start your free 14-day trial here — no credit card needed. Or book a personalised demo with the team.'
+    },
+    {
+      target: '#faq',
+      text: 'All your questions answered. Click any item to expand. And that\'s the full tour! 🎉 Click me anytime to restart.'
+    }
+  ];
+
+  let stepIndex = -1;
+  let lastHighlight = null;
+
+  function buildDots() {
+    const prog = document.getElementById('bubble-progress');
+    prog.innerHTML = '';
+    tourSteps.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'bp-dot' + (i === stepIndex ? ' active' : '');
+      prog.appendChild(d);
+    });
+  }
+
+  function clearHighlight() {
+    if (lastHighlight) {
+      lastHighlight.classList.remove('tour-highlight');
+      lastHighlight = null;
+    }
+  }
+
+  function nextStep() {
+    stepIndex++;
+    clearHighlight();
+
+    if (stepIndex >= tourSteps.length) {
+      document.getElementById('copilot-bubble').innerHTML = `
+        <div class="bubble-name">Shifty · SideShift Guide</div>
+        <div class="bubble-text">Tour complete! 🎉 You now know your way around. Click me anytime to restart.</div>
+        <div class="bubble-actions">
+          <button class="bact next" onclick="restartTour()">Restart</button>
+          <button class="bact skip" onclick="closeBubble()">Close</button>
+        </div>`;
+      return;
+    }
+
+    const step = tourSteps[stepIndex];
+    document.getElementById('bubble-text').textContent = step.text;
+
+    const isLast = stepIndex === tourSteps.length - 1;
+    document.querySelector('.bact.next').textContent = isLast ? 'Finish 🎉' : 'Next →';
+    buildDots();
+
+    const target = document.querySelector(step.target);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('tour-highlight');
+      lastHighlight = target;
+      setTimeout(() => target.classList.remove('tour-highlight'), 2200);
+    }
+
+    // Wobble mascot
+    const img = document.getElementById('mascot-img');
+    img.style.animation = 'none';
+    void img.offsetWidth;
+    img.style.animation = 'mascot-wobble 0.6s ease-in-out, shifty-float 3s ease-in-out 0.6s infinite';
+  }
+
+  function closeBubble() {
+    document.getElementById('copilot-bubble').style.display = 'none';
+    clearHighlight();
+  }
+
+  function toggleBubble() {
+    const b = document.getElementById('copilot-bubble');
+    if (b.style.display === 'none') {
+      b.style.display = 'block';
+      b.style.animation = 'none';
+      void b.offsetWidth;
+      b.style.animation = 'bubble-in 0.35s cubic-bezier(0.34,1.56,0.64,1)';
+    } else {
+      closeBubble();
+    }
+  }
+
+  function restartTour() {
+    stepIndex = -1;
+    clearHighlight();
+    document.getElementById('copilot-bubble').innerHTML = `
+      <div class="bubble-name">Shifty · SideShift Guide</div>
+      <div class="bubble-text" id="bubble-text">Back for another tour? Let's go! 👋</div>
+      <div class="bubble-actions">
+        <button class="bact next" onclick="nextStep()">Let's go →</button>
+        <button class="bact skip" onclick="closeBubble()">Skip</button>
+      </div>
+      <div class="bubble-progress" id="bubble-progress"></div>`;
+    buildDots();
+  }
+
+  // Wobble keyframe injected via JS
+  const style = document.createElement('style');
+  style.textContent = `@keyframes mascot-wobble { 0% { transform: rotate(0); } 25% { transform: rotate(-8deg) scale(1.05); } 75% { transform: rotate(8deg) scale(1.05); } 100% { transform: rotate(0); } }`;
+  document.head.appendChild(style);
+
+  // Init dots
+  buildDots();
+</script>
+</body>
+</html>
