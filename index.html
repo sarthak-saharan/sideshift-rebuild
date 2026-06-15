@@ -943,27 +943,110 @@
     }
 
     /* ─── RESPONSIVE ─── */
+
+    /* Tablet */
     @media (max-width: 1024px) {
-      :root { --px-global: 24px; }
-      .hero-inner { flex-direction: column; }
-      .hero-text { min-width: unset; }
+      :root { --px-global: 24px; --py-section: 64px; }
+      .hero-inner { flex-direction: column; gap: 32px; }
+      .hero-text { min-width: unset; max-width: 100%; }
       .hero-visual { display: none; }
       .metrics-grid { grid-template-columns: repeat(2,1fr); }
       .creators-grid { grid-template-columns: repeat(2,1fr); }
       .footer-top { grid-template-columns: 1fr 1fr 1fr; }
+      .how-panel.active { gap: 40px; }
     }
 
+    /* Mobile */
     @media (max-width: 768px) {
+      :root { --px-global: 16px; --py-section: 56px; }
+
+      /* Header */
       .header-nav { display: none; }
       .for-creators-link { display: none; }
-      .how-panel.active { grid-template-columns: 1fr; }
-      .how-visual { display: none; }
-      .testi-track { animation-play-state: paused; flex-wrap: wrap; width: 100%; padding: 0 var(--px-global); }
+      .login-link { display: none; }
+      .header-inner { padding: 0 16px; }
+      .btn-nav { font-size: 0.8rem; padding: 8px 14px; }
+
+      /* Disclaimer banner */
+      #disclaimer-banner { font-size: 0.72rem; padding: 8px 12px; white-space: normal; line-height: 1.5; }
+
+      /* Hero */
+      #hero { padding-top: 130px; padding-bottom: 48px; text-align: center; }
+      .hero-text { align-items: center; gap: 12px; }
+      .hero-sub { font-size: 0.95rem; text-align: center; }
+      .hero-ctas { justify-content: center; flex-direction: column; width: 100%; }
+      .hero-ctas .btn { width: 100%; justify-content: center; padding: 14px 20px; font-size: 1rem; min-height: 48px; }
+      .hero-badge { font-size: 0.75rem; }
+
+      /* Trust logos */
+      #trust { padding: 32px 0; }
+      .trust-label { font-size: 0.72rem; padding: 0 16px; }
+
+      /* Metrics */
+      #metrics { padding: 48px 16px; }
+      .metrics-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .metric-card { padding: 20px 16px; }
+      .metric-num { font-size: 1.8rem; }
+      .metrics-header { margin-bottom: 28px; }
+
+      /* Testimonials */
+      #testimonials { padding: 56px 0; }
+      .testi-track { animation-play-state: paused; flex-wrap: wrap; width: 100%; padding: 0 16px; gap: 12px; }
       .testi-card { width: 100%; }
-      .ct-head, .ct-row { grid-template-columns: 1fr 1fr; }
-      .ct-cell:nth-child(3), .ct-cell:nth-child(4), .ct-col:nth-child(3), .ct-col:nth-child(4) { display: none; }
-      .creators-grid { grid-template-columns: 1fr 1fr; }
-      .footer-top { grid-template-columns: 1fr 1fr; }
+
+      /* How it works */
+      #how { padding: 56px 16px; }
+      .how-tabs { gap: 6px; }
+      .how-tab { font-size: 0.78rem; padding: 7px 12px; }
+      .how-panel.active { grid-template-columns: 1fr; gap: 28px; }
+      .how-visual { display: none; }
+      .how-text h3 { font-size: 1.25rem; }
+
+      /* Comparison table */
+      #compare { padding: 56px 16px; }
+      .ct-head { grid-template-columns: 1fr 1fr; }
+      .ct-row { grid-template-columns: 1fr 1fr; }
+      .ct-col:nth-child(3), .ct-col:nth-child(4) { display: none; }
+      .ct-cell:nth-child(3), .ct-cell:nth-child(4) { display: none; }
+      .ct-cell { padding: 12px 14px; font-size: 0.8rem; }
+
+      /* Creators */
+      #creators { padding: 56px 16px; }
+      .creators-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .creator-card { padding: 16px; }
+      .filter-strip { gap: 6px; }
+      .filter-btn { font-size: 0.75rem; padding: 6px 12px; }
+
+      /* CTA */
+      #cta { padding: 64px 16px; }
+      .cta-btns { flex-direction: column; align-items: stretch; }
+      .cta-btns .btn { width: 100%; justify-content: center; min-height: 48px; }
+
+      /* FAQ */
+      #faq { padding: 56px 16px; }
+      .faq-q { font-size: 0.875rem; padding: 16px 0; }
+
+      /* Footer */
+      footer { padding: 48px 16px 32px; }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 28px; }
+      .footer-brand { grid-column: 1 / -1; }
+      .footer-bottom { flex-direction: column; gap: 14px; text-align: center; }
+
+      /* Mascot */
+      #copilot { bottom: 16px; right: 16px; gap: 8px; }
+      #mascot-img { width: 100px; }
+      #copilot-bubble { max-width: calc(100vw - 60px); min-width: unset; }
+
+      /* Section labels */
+      .section-label { font-size: 0.72rem; }
+    }
+
+    /* Extra small phones */
+    @media (max-width: 380px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+      .creators-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 2rem; }
+      h2 { font-size: 1.5rem; }
     }
   </style>
 </head>
